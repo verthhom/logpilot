@@ -44,6 +44,17 @@ func TestParse_InvalidFlag(t *testing.T) {
 	}
 }
 
+func TestParse_MultipleFiles(t *testing.T) {
+	args := []string{"a.log", "b.log", "c.log"}
+	cfg, _, err := parse(args, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(cfg.Files) != 3 {
+		t.Errorf("expected 3 files, got %d: %v", len(cfg.Files), cfg.Files)
+	}
+}
+
 func TestExecute_InvalidFormat(t *testing.T) {
 	cfg := &Config{Format: "xml", Filters: nil, Files: []string{}}
 	err := execute(context.Background(), cfg, &bytes.Buffer{})
