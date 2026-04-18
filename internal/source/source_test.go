@@ -54,6 +54,33 @@ func TestFileSource_Tail_ReadsAllLines(t *testing.T) {
 	}
 }
 
+func TestFileSource_Tail_LineContent(t *testing.T) {
+	const line1 = `{"level":"info","msg":"hello"}`
+	const line2 = `{"level":"warn","msg":"world"}`
+	path := writeTempFile(t, line1+"\n"+line2+"\n")
+
+	fs := source.NewFile(path)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	ch, err := fs.Tail(ctx)
+	if err != nil {
+		t.Fatalf("Tail error: %v", err)
+	}
+
+	var lines []source.Line
+	for l := range ch {
+		lines = append(lines, l)
+	}
+
+	if lines[0].Text != line1 {
+		t.Errorf("line 0: expected %q, got %q", line1, lines[0].Text)
+	}
+	if lines[1].Text != line2 {
+		t.Errorf("line 1: expected %q, got %q", line2, lines[1].Text)
+	}
+}
+
 func TestFileSource_Tail_ContextCancel(t *testing.T) {
 	path := writeTempFile(t, "{\"a\":1}\n{\"b\":2}\n{\"c\":3}\n")
 
