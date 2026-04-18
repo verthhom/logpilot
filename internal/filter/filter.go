@@ -45,7 +45,7 @@ func (f *Filter) Match(entry map[string]interface{}) bool {
 			if !exists {
 				return false
 			}
-		case "eq":
+		 case "eq":
 			if !exists || toString(val) != rule.Value {
 				return false
 			}
@@ -58,6 +58,11 @@ func (f *Filter) Match(entry map[string]interface{}) bool {
 		}
 	}
 	return true
+}
+
+// IsEmpty returns true if the filter has no rules, meaning it matches everything.
+func (f *Filter) IsEmpty() bool {
+	return len(f.Rules) == 0
 }
 
 func toString(v interface{}) string {
