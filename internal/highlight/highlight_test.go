@@ -54,6 +54,27 @@ func TestLevel_CaseInsensitive(t *testing.T) {
 	}
 }
 
+func TestLevel_AllKnownLevels(t *testing.T) {
+	tests := []struct {
+		level    string
+		expColor string
+	}{
+		{"error", Red},
+		{"warn", Yellow},
+		{"info", Green},
+		{"debug", Blue},
+	}
+	h := New(true)
+	for _, tt := range tests {
+		t.Run(tt.level, func(t *testing.T) {
+			result := h.Level(tt.level)
+			if !strings.Contains(result, tt.expColor) {
+				t.Errorf("Level(%q): expected color %q, got %q", tt.level, tt.expColor, result)
+			}
+		})
+	}
+}
+
 func TestKey_Enabled(t *testing.T) {
 	h := New(true)
 	result := h.Key("message")
