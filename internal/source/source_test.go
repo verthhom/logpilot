@@ -20,6 +20,17 @@ func writeTempFile(t *testing.T, content string) string {
 	return p
 }
 
+// collectLines drains the channel returned by Tail and returns all lines.
+// It fails the test if the channel does not close within the context deadline.
+func collectLines(t *testing.T, ch <-chan source.Line) []source.Line {
+	t.Helper()
+	var lines []source.Line
+	for l := range ch {
+		lines = append(lines, l)
+	}
+	return lines
+}
+
 func TestFileSource_Name(t *testing.T) {
 	fs := source.NewFile("/var/log/app.log")
 	if fs.Name() != "/var/log/app.log" {
@@ -41,10 +52,7 @@ func TestFileSource_Tail_ReadsAllLines(t *testing.T) {
 		t.Fatalf("Tail error: %v", err)
 	}
 
-	var lines []source.Line
-	for l := range ch {
-		lines = append(lines, l)
-	}
+	lines := collectLines(t, ch)
 
 	if len(lines) != 2 {
 		t.Fatalf("expected 2 lines, got %d", len(lines))
@@ -68,10 +76,7 @@ func TestFileSource_Tail_LineContent(t *testing.T) {
 		t.Fatalf("Tail error: %v", err)
 	}
 
-	var lines []source.Line
-	for l := range ch {
-		lines = append(lines, l)
-	}
+	lines := collectLines(t, ch)
 
 	if lines[0].Text != line1 {
 		t.Errorf("line 0: expected %q, got %q", line1, lines[0].Text)
