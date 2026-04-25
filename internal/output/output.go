@@ -89,11 +89,21 @@ func (w *Writer) writePretty(line string) error {
 		sb.WriteString(" ")
 		sb.WriteString(w.hl.Key(k))
 		sb.WriteString("=")
-		sb.WriteString(fmt.Sprintf("%v", fields[k]))
+		sb.WriteString(formatFieldValue(fields[k]))
 	}
 
 	_, err := fmt.Fprintln(w.out, sb.String())
 	return err
+}
+
+// formatFieldValue renders a log field value as a string. String values that
+// contain spaces are quoted so the key=value output remains unambiguous.
+func formatFieldValue(v interface{}) string {
+	s := fmt.Sprintf("%v", v)
+	if strings.ContainsAny(s, " \t") {
+		return fmt.Sprintf("%q", s)
+	}
+	return s
 }
 
 func extractTime(fields map[string]interface{}) string {
